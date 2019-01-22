@@ -25,6 +25,7 @@ def update_state(state, entity, dt):
     if dt is None:
         return
 
+    # convert timestamp int to datetime
     if isinstance(dt, int):
         dt = ts_to_dt(dt)
 
@@ -40,7 +41,7 @@ def update_state(state, entity, dt):
 
 def get_starting_point(stream, state, start_date):
     if stream['stream'] in state['bookmarks'] and \
-                    state['bookmarks'][stream['stream']] is not None:
+            state['bookmarks'][stream['stream']] is not None:
         return dt_to_ts(state['bookmarks'][stream['stream']]['since'])
     elif start_date:
         return dt_to_ts(start_date)
@@ -100,7 +101,8 @@ def get_incremental_pull(stream, endpoint, state, api_key, start_date):
 
                 singer.write_records(stream['stream'], events)
 
-                update_state(state, stream['stream'], get_latest_event_time(events))
+                update_state(state, stream['stream'],
+                             get_latest_event_time(events))
                 singer.write_state(state)
 
     return state

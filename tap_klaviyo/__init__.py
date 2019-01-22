@@ -9,10 +9,13 @@ from tap_klaviyo.utils import get_incremental_pull, get_full_pulls, get_all_page
 ENDPOINTS = {
     'global_exclusions': 'https://a.klaviyo.com/api/v1/people/exclusions',
     'lists': 'https://a.klaviyo.com/api/v1/lists',
+    # to get all available metrics
     'metrics': 'https://a.klaviyo.com/api/v1/metrics',
+    # to get individual metric data
     'metric': 'https://a.klaviyo.com/api/v1/metric/',
 }
 
+# listing of incremental streams
 EVENT_MAPPINGS = {
     "Received Email": "receive",
     "Clicked Email": "click",
@@ -41,6 +44,7 @@ class Stream(object):
             'key_properties': self.key_properties,
             'schema': load_schema(self.stream)
         }
+
 
 CREDENTIALS_KEYS = ["api_key"]
 REQUIRED_CONFIG_KEYS = ["start_date"] + CREDENTIALS_KEYS
@@ -74,7 +78,10 @@ def do_sync(config, state, catalog):
     api_key = config['api_key']
     start_date = config['start_date'] if 'start_date' in config else None
 
-    for stream in catalog['streams']:
+    selected_streams = [stream for stream in catalog['streams']
+                        if stream['schema']['selected'] == True]
+
+    for stream in selected_streams:
         singer.write_schema(
             stream['stream'],
             stream['schema'],
