@@ -9,7 +9,7 @@ from tap_klaviyo.utils import get_incremental_pull, get_full_pulls, get_all_page
 ENDPOINTS = {
     'global_exclusions': 'https://a.klaviyo.com/api/v1/people/exclusions',
     'lists': 'https://a.klaviyo.com/api/v1/lists',
-    # to get all available metrics
+    # to get list of available metrics
     'metrics': 'https://a.klaviyo.com/api/v1/metrics',
     # to get individual metric data
     'metric': 'https://a.klaviyo.com/api/v1/metric/',
