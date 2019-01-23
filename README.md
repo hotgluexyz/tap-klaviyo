@@ -42,9 +42,11 @@ This tap:
    commits and issues.
 
    ```json
-   {"bookmarks":
-       "receive": {"since": "2017-04-01T00:00:00Z"},
-       "open": {"since": "2017-04-01T00:00:00Z"},
+   {
+     "bookmarks": {
+       "receive": { "since": "2017-04-01T00:00:00Z" },
+       "open": { "since": "2017-04-01T00:00:00Z" }
+     }
    }
    ```
 
