@@ -131,7 +131,7 @@ def main():
         exit(1)
 
     else:
-        catalog = args.properties.to_dict() if args.properties else discover(
+        catalog = args.properties if args.properties else discover(
             args.config['api_key'])
         state = args.state if args.state else {"bookmarks": {}}
         do_sync(args.config, state, catalog)
