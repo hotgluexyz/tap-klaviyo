@@ -79,7 +79,7 @@ def do_sync(config, state, catalog):
     start_date = config['start_date'] if 'start_date' in config else None
 
     selected_streams = [stream for stream in catalog['streams']
-                        if stream['schema']['selected'] == True]
+                        if stream.get('schema').get('selected') == True]
 
     for stream in selected_streams:
         singer.write_schema(
@@ -119,7 +119,7 @@ def discover(api_key):
 
 
 def do_discover(api_key):
-    print(json.dumps(discover(api_key), indent=4))
+    print(json.dumps(discover(api_key), indent=2))
 
 
 def main():
@@ -131,7 +131,7 @@ def main():
         exit(1)
 
     else:
-        catalog = args.catalog.to_dict() if args.catalog else discover(
+        catalog = args.properties.to_dict() if args.properties else discover(
             args.config['api_key'])
         state = args.state if args.state else {"bookmarks": {}}
         do_sync(args.config, state, catalog)

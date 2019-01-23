@@ -1,1 +1,10 @@
 */__pycache__/
+
+build/
+dist/
+venv/
+
+*.egg-info
+
+config.json
+catalog.json
