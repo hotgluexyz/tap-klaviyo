@@ -79,7 +79,7 @@ def do_sync(config, state, catalog):
     start_date = config['start_date'] if 'start_date' in config else None
 
     selected_streams = [stream for stream in catalog['streams']
-                        if stream.get('schema').get('selected') == True]
+                        if stream.get('schema').get('selected') is True]
 
     for stream in selected_streams:
         singer.write_schema(

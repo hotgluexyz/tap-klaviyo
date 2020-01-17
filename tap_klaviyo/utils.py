@@ -113,6 +113,6 @@ def get_full_pulls(resource, endpoint, api_key):
         for response in get_all_pages(resource['stream'], endpoint, api_key):
             records = response.json().get('data')
 
-            counter.increment(len(records))
-
-            singer.write_records(resource['stream'], records)
+            if records:
+                counter.increment(len(records))
+                singer.write_records(resource['stream'], records)
