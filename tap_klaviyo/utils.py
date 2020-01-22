@@ -3,9 +3,9 @@ import time
 import singer
 from singer import metrics
 import requests
-import backoff
 
 DATETIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
+
 
 session = requests.Session()
 logger = singer.get_logger()
@@ -53,15 +53,11 @@ def get_latest_event_time(events):
     return ts_to_dt(int(events[-1]['timestamp'])) if len(events) else None
 
 
-@backoff.on_exception(backoff.expo, requests.HTTPError, max_tries=10, factor=2, logger=logger)
 def authed_get(source, url, params):
     with metrics.http_request_timer(source) as timer:
         resp = session.request(method='get', url=url, params=params)
         timer.tags[metrics.Tag.http_status_code] = resp.status_code
-
-    resp.raise_for_status()
-
-    return resp
+        return resp
 
 
 def get_all_using_next(stream, url, api_key, since=None):
