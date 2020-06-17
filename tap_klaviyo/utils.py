@@ -53,6 +53,7 @@ def get_starting_point(stream, state, start_date):
 def get_latest_event_time(events):
     return ts_to_dt(int(events[-1]['timestamp'])) if len(events) else None
 
+
 @backoff.on_exception(backoff.expo, requests.HTTPError, max_tries=10, factor=2, logger=logger)
 def authed_get(source, url, params):
     with metrics.http_request_timer(source) as timer:
@@ -86,6 +87,33 @@ def get_all_pages(source, url, api_key):
             break
 
 
+def get_list_members(url, api_key, id):
+    marker = None
+    while True:
+        r = authed_get('list_members', url.format(list_id=id), {'api_key': api_key,
+                                                                'marker': marker})
+        response = r.json()
+        records = hydrate_record_with_list_id(response.get('records'), id)
+        yield records
+        marker = response.get('marker')
+        if not marker:
+            break
+
+
+def hydrate_record_with_list_id(records, list_id):
+    """
+    Args:
+        records (array [JSON]):
+        list_id (str):
+    Returns:
+        array of records, with the list_id appended to each record
+    """
+    for record in records:
+        record['list_id'] = list_id
+
+    return records
+
+
 def get_incremental_pull(stream, endpoint, state, api_key, start_date):
     latest_event_time = get_starting_point(stream, state, start_date)
 
@@ -111,11 +139,18 @@ def get_incremental_pull(stream, endpoint, state, api_key, start_date):
     return state
 
 
-def get_full_pulls(resource, endpoint, api_key):
+def get_full_pulls(resource, endpoint, api_key, list_ids=None):
     with metrics.record_counter(resource['stream']) as counter:
-        for response in get_all_pages(resource['stream'], endpoint, api_key):
-            records = response.json().get('data')
+        if resource['stream'] == 'list_members':
+            for id in list_ids:
+                for records in get_list_members(endpoint, api_key, id):
+                    if records:
+                        counter.increment(len(records))
+                        singer.write_records(resource['stream'], records)
+        else:
+            for response in get_all_pages(resource['stream'], endpoint, api_key):
+                records = response.json().get('data')
 
-            if records:
-                counter.increment(len(records))
-                singer.write_records(resource['stream'], records)
+                if records:
+                    counter.increment(len(records))
+                    singer.write_records(resource['stream'], records)

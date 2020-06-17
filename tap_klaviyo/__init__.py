@@ -13,6 +13,8 @@ ENDPOINTS = {
     'metrics': 'https://a.klaviyo.com/api/v1/metrics',
     # to get individual metric data
     'metric': 'https://a.klaviyo.com/api/v1/metric/',
+    # to get list members
+    'list_members': 'https://a.klaviyo.com/api/v2/group/{list_id}/members/all'
 }
 
 # listing of incremental streams
@@ -63,7 +65,14 @@ LISTS = Stream(
     'lists'
 )
 
-FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS]
+LIST_MEMBERS = Stream(
+    'list_members',
+    'list_members',
+    'email',
+    'full'
+)
+
+FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS, LIST_MEMBERS]
 
 
 def get_abs_path(path):
@@ -76,6 +85,7 @@ def load_schema(name):
 
 def do_sync(config, state, catalog):
     api_key = config['api_key']
+    list_ids = config.get('list_ids')
     start_date = config['start_date'] if 'start_date' in config else None
 
     selected_streams = [stream for stream in catalog['streams']
@@ -90,6 +100,8 @@ def do_sync(config, state, catalog):
         if stream['stream'] in EVENT_MAPPINGS.values():
             get_incremental_pull(stream, ENDPOINTS['metric'], state,
                                  api_key, start_date)
+        elif stream['stream'] == 'list_members' and list_ids:
+            get_full_pulls(stream, ENDPOINTS[stream['stream']], api_key, list_ids)
         else:
             get_full_pulls(stream, ENDPOINTS[stream['stream']], api_key)
 

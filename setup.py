@@ -11,7 +11,8 @@ setup(name='tap-klaviyo',
       py_modules=['tap_klaviyo'],
       install_requires=['singer-python==3.2.1',
                         'requests==2.13.0',
-                        'backoff'],
+                        'backoff',
+                        'ipdb'],
       entry_points='''
           [console_scripts]
           tap-klaviyo=tap_klaviyo:main
@@ -28,6 +29,7 @@ setup(name='tap-klaviyo',
                 "dropped_email.json",
                 "global_exclusions.json",
                 "lists.json",
+                "list_members.json",
                 "subscribe_list.json",
                 "unsub_list.json",
                 "update_email_preferences.json",
