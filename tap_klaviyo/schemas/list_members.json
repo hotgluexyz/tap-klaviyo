@@ -4,6 +4,9 @@
     "id": {
       "type": "string"
     },
+    "list_id": {
+      "type": "string"
+    },
     "email": {
       "type": "string"
     }
