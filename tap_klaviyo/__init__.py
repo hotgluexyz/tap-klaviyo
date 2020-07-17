@@ -32,6 +32,10 @@ EVENT_MAPPINGS = {
 }
 
 
+class ListMemberStreamException(Exception):
+    pass
+
+
 class Stream(object):
     def __init__(self, stream, tap_stream_id, key_properties, puller):
         self.stream = stream
@@ -100,8 +104,14 @@ def do_sync(config, state, catalog):
         if stream['stream'] in EVENT_MAPPINGS.values():
             get_incremental_pull(stream, ENDPOINTS['metric'], state,
                                  api_key, start_date)
-        elif stream['stream'] == 'list_members' and list_ids:
-            get_full_pulls(stream, ENDPOINTS[stream['stream']], api_key, list_ids)
+        elif stream['stream'] == 'list_members':
+            if list_ids:
+                get_full_pulls(stream, ENDPOINTS[stream['stream']], api_key, list_ids)
+            else:
+                raise ListMemberStreamException(
+                    'A list of Klaviyo List IDs must be specified in the client tap '
+                    'config if extracting list members. Check out the Untuckit Klaviyo '
+                    'tap for reference')
         else:
             get_full_pulls(stream, ENDPOINTS[stream['stream']], api_key)
 
