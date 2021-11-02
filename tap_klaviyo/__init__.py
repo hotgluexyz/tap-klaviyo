@@ -3,6 +3,7 @@
 import json
 import os
 import singer
+from singer import metadata
 
 from tap_klaviyo.utils import get_incremental_pull, get_full_pulls, get_all_pages
 
@@ -48,7 +49,8 @@ class Stream(object):
             'stream': self.stream,
             'tap_stream_id': self.tap_stream_id,
             'key_properties': self.key_properties,
-            'schema': load_schema(self.stream)
+            'schema': load_schema(self.stream),
+            'metadata': build_metadata(self.stream, self.key_properties)
         }
 
 
@@ -87,13 +89,30 @@ def load_schema(name):
     return json.load(open(get_abs_path('schemas/{}.json'.format(name))))
 
 
+def build_metadata(name, key_properties):
+    schema = load_schema(name)
+
+    mdata = metadata.new()
+    mdata = metadata.write(mdata, (), 'table-key-properties', key_properties)
+    
+    for field in schema["properties"].keys():
+        mdata = metadata.write(mdata, ('properties', field), 'inclusion', 'available')
+
+    return metadata.to_list(mdata)
+
+def stream_is_selected(mdata):
+    return mdata.get((), {}).get('selected', False)
+
 def do_sync(config, state, catalog):
     api_key = config['api_key']
     list_ids = config.get('list_ids')
     start_date = config['start_date'] if 'start_date' in config else None
 
-    selected_streams = [stream for stream in catalog['streams']
-                        if stream.get('schema').get('selected') is True]
+    selected_streams = []
+    for stream in catalog['streams']:
+        mdata = metadata.to_map(stream.get('metadata'))
+        if stream_is_selected(mdata):
+            selected_streams.append(stream)
 
     for stream in selected_streams:
         singer.write_schema(
