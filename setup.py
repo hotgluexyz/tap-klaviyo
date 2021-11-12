@@ -3,13 +3,13 @@
 from setuptools import setup
 
 setup(name='tap-klaviyo',
-      version='0.0.2',
+      version='0.0.3',
       description='Singer.io tap for extracting data from the Klaviyo API',
       author='Stitch',
       url='http://singer.io',
       classifiers=['Programming Language :: Python :: 3 :: Only'],
       py_modules=['tap_klaviyo'],
-      install_requires=['singer-python==3.2.1',
+      install_requires=['singer-python==5.12.2',
                         'requests==2.13.0',
                         'backoff',
                         'ipdb'],
