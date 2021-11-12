@@ -169,7 +169,6 @@ def main():
 
     if args.discover:
         do_discover(args.config['api_key'])
-        exit(1)
 
     else:
         catalog = args.properties if args.properties else discover(
