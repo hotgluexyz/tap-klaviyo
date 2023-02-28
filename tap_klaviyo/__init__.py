@@ -15,7 +15,8 @@ ENDPOINTS = {
     # to get individual metric data
     'metric': 'https://a.klaviyo.com/api/v1/metric/',
     # to get list members
-    'list_members': 'https://a.klaviyo.com/api/v2/group/{list_id}/members/all'
+    'list_members': 'https://a.klaviyo.com/api/v2/group/{list_id}/members/all',
+    'events': 'https://a.klaviyo.com/api/events/',
 }
 
 # listing of incremental streams
@@ -30,6 +31,7 @@ EVENT_MAPPINGS = {
     "Subscribed to List": "subscribe_list",
     "Updated Email Preferences": "update_email_preferences",
     "Dropped Email": "dropped_email",
+    "Events": "events",
 }
 
 
@@ -78,7 +80,14 @@ LIST_MEMBERS = Stream(
     'full'
 )
 
-FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS, LIST_MEMBERS]
+EVENTS = Stream(
+    'events',
+    'events',
+    'uuid',
+    'full'
+)
+
+FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS, LIST_MEMBERS, EVENTS]
 
 
 def get_abs_path(path):
@@ -121,7 +130,7 @@ def do_sync(config, state, catalog):
             stream['key_properties']
         )
         if stream['stream'] in EVENT_MAPPINGS.values():
-            get_incremental_pull(stream, ENDPOINTS['metric'], state,
+            get_incremental_pull(stream, ENDPOINTS, state,
                                  api_key, start_date)
         elif stream['stream'] == 'list_members':
             if list_ids:

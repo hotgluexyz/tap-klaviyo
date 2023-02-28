@@ -10,3 +10,5 @@ venv/
 config.json
 catalog.json
 state.json
+.secrets/*
+.python-version
