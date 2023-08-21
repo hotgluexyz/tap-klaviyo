@@ -1,6 +1,18 @@
 {
   "type": "object",
   "properties": {
+    "object": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "list_type": {
+      "type": "string"
+    },
     "created": {
       "type": "string"
     },
@@ -9,18 +21,6 @@
     },
     "person_count": {
       "type": "integer"
-    },
-    "object": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "type": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string"
     }
   }
 }
