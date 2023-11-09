@@ -51,23 +51,33 @@ def get_starting_point(stream, state, start_date):
 
 
 def get_latest_event_time(events):
+    if "updated" in events[-1]:
+        parsed_datetime = datetime.datetime.strptime(events[-1]['updated'], '%Y-%m-%dT%H:%M:%S%z')
+        timestamp = parsed_datetime.timestamp()
+        return ts_to_dt(int(timestamp)) if len(events) else None
     return ts_to_dt(int(events[-1]['timestamp'])) if len(events) else None
 
 
 @backoff.on_exception(backoff.expo, (requests.HTTPError,requests.ConnectionError), max_tries=10, factor=2, logger=logger)
 def authed_get(source, url, params):
     headers = {}
-    if source=='events':
+    if source in ['events',"profiles"]:
         headers['Authorization'] = f"Klaviyo-API-Key {params['api_key']}"
         headers['revision'] = "2023-02-22"
         #override the params
         new_params = {}
-        new_params['sort'] = "-datetime"
+        if source =="events":
+            new_params['sort'] = "-datetime"
+            filter_key = "datetime"
+        else:
+            new_params['sort'] = "updated"
+            filter_key = "updated"
+
         if isinstance(params['since'],str):
             url = params['since']
             new_params = {}
         else:
-            new_params['filter'] = f"greater-than(datetime,{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime(params['since']))})"
+            new_params['filter'] = f"greater-than({filter_key},{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime(params['since']))})"
         params = new_params
 
     with metrics.http_request_timer(source) as timer:
@@ -84,7 +94,7 @@ def get_all_using_next(stream, url, api_key, since=None):
                                      'since': since,
                                      'sort': 'asc'})
         yield r
-        if stream=="events":
+        if stream in ["events","profiles"]:
             r = r.json()['links']
             if 'next' in r and r['next']:
                 since = r['next']
@@ -141,6 +151,13 @@ def transform_events_data(data):
             if row['attributes']["profile_id"] is None:
                 row['attributes']["profile_id"] = ""
         return_data.append(row['attributes'])
+    return return_data  
+ 
+def transform_profiles_data(data):
+    return_data = []
+    for row in data:
+        row['timestamp'] = row['attributes']['updated']
+        return_data.append(row['attributes'])
     return return_data   
 
 def get_incremental_pull(stream, endpoint, state, api_key, start_date):
@@ -149,6 +166,8 @@ def get_incremental_pull(stream, endpoint, state, api_key, start_date):
     with metrics.record_counter(stream['stream']) as counter:
         if stream['stream']=="events":
             url = endpoint['events']
+        elif stream['stream']=="profiles":
+            url = endpoint['profiles']
         else:
             endpoint = endpoint['metric']
             url = '{}{}/timeline'.format(
@@ -161,6 +180,9 @@ def get_incremental_pull(stream, endpoint, state, api_key, start_date):
             if stream['stream']=="events":
                 events = response.json().get('data')
                 events = transform_events_data(events)
+            elif stream['stream']=="profiles":
+                events = response.json().get('data')
+                events = transform_profiles_data(events)
             else:
                 events = response.json().get('data')    
 
