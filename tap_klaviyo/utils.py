@@ -64,6 +64,7 @@ def authed_get(source, url, params):
     if source in ['events',"profiles"]:
         args = singer.utils.parse_args()
         headers['Authorization'] = f"Bearer {params['api_key']}" if args.config.get("refresh_token") else f"Klaviyo-API-Key {params['api_key']}"
+        logger.info(f"Auth header = {headers['Authorization']}")
         headers['revision'] = "2023-02-22"
         #override the params
         new_params = {}
