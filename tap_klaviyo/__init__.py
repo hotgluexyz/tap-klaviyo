@@ -4,6 +4,8 @@ import json
 import os
 import singer
 from singer import metadata
+import requests
+from requests.auth import HTTPBasicAuth
 
 from tap_klaviyo.utils import get_incremental_pull, get_full_pulls, get_all_pages
 
@@ -54,8 +56,8 @@ class Stream(object):
         }
 
 
-CREDENTIALS_KEYS = ["api_key"]
-REQUIRED_CONFIG_KEYS = ["start_date"] + CREDENTIALS_KEYS
+# CREDENTIALS_KEYS = ["api_key"]
+REQUIRED_CONFIG_KEYS = ["start_date"] #+ CREDENTIALS_KEYS
 
 GLOBAL_EXCLUSIONS = Stream(
     'global_exclusions',
@@ -118,7 +120,7 @@ def stream_is_selected(mdata):
     return mdata.get((), {}).get('selected', False)
 
 def do_sync(config, state, catalog):
-    api_key = config['api_key']
+    api_key = config.get("api_key") or config.get("access_token")
     list_ids = config.get('list_ids')
     start_date = config['start_date'] if 'start_date' in config else None
 
@@ -176,16 +178,33 @@ def do_discover(api_key):
     print(json.dumps(discover(api_key), indent=2))
 
 
-def main():
+def refresh_credentials(config):
+    body = {"grant_type": "refresh_token",
+            "refresh_token": config["refresh_token"]}
 
+    resp = requests.post("https://a.klaviyo.com/oauth/token", data=body, auth=HTTPBasicAuth(config["client_id"], config["client_secret"]))
+    resp.raise_for_status()
+    config["access_token"] = resp.json()['access_token']
+
+    # TODO: Need to refresh the token in case of long running jobs
+    # login_timer = threading.Timer(REFRESH_TOKEN_EXPIRATION_PERIOD, refresh_credentials)
+    # login_timer.start()
+
+
+def main():
     args = singer.utils.parse_args(REQUIRED_CONFIG_KEYS)
 
+    # Refresh the access_token if refresh_token is present
+    if args.config.get("refresh_token"):
+        refresh_credentials(args.config)
+
+    access_token = args.config.get("api_key") or args.config.get("access_token")
+
     if args.discover:
-        do_discover(args.config['api_key'])
+        do_discover(access_token)
 
     else:
-        catalog = args.properties if args.properties else discover(
-            args.config['api_key'])
+        catalog = args.properties if args.properties else discover(access_token)
         state = args.state if args.state else {"bookmarks": {}}
         do_sync(args.config, state, catalog)
 
