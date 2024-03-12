@@ -62,7 +62,8 @@ def get_latest_event_time(events):
 def authed_get(source, url, params):
     headers = {}
     if source in ['events',"profiles"]:
-        headers['Authorization'] = f"Klaviyo-API-Key {params['api_key']}"
+        args = singer.utils.parse_args()
+        headers['Authorization'] = f"Bearer {params['api_key']}" if args.config.get("refresh_token") else f"Klaviyo-API-Key {params['api_key']}"
         headers['revision'] = "2023-02-22"
         #override the params
         new_params = {}
