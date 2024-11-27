@@ -1,0 +1,256 @@
+{
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "enum": [
+                "review"
+            ]
+        },
+        "id": {
+            "type": "string",
+            "description": "The ID of the review"
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "description": "The email of the author of this review"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "featured",
+                        "pending",
+                        "published",
+                        "rejected",
+                        "unpublished"
+                    ],
+                    "description": "The status of this review"
+                },
+                "verified": {
+                    "type": "boolean",
+                    "description": "The verification status of this review (aka whether or not we have confirmation that the customer bought the product)"
+                },
+                "review_type": {
+                    "type": "string",
+                    "enum": [
+                        "review",
+                        "question",
+                        "rating"
+                    ],
+                    "description": "The type of this review"
+                },
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The datetime when this review was created"
+                },
+                "updated": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The datetime when this review was updated"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": "The list of images submitted with this review (represented as a list of urls). If there are no images, this field will be an empty list."
+                },
+                "product": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "description": "The product associated with this review",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL of the product"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the product"
+                        },
+                        "image_url": {
+                            "type": "string",
+                            "description": "The URL of the product image"
+                        }
+                    }
+                },
+                "rating": {
+                    "type": [
+                        "integer",
+                        "null"
+                    ],
+                    "description": "The rating of this review on a scale from 1-5"
+                },
+                "author": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "The author of this review"
+                },
+                "content": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "The content of this review"
+                },
+                "title": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "The title of this review"
+                },
+                "smart_quote": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "A quote from this review that summarizes the content"
+                },
+                "public_reply": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "description": "The content of the public reply"
+                        },
+                        "author": {
+                            "type": "string",
+                            "description": "The author of the public reply"
+                        },
+                        "updated": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "The datetime when this public reply was updated"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "email",
+                "verified",
+                "review_type",
+                "created",
+                "updated",
+                "images"
+            ]
+        },
+        "links": {
+            "type": "object",
+            "properties": {
+                "self": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Self link"
+                }
+            },
+            "required": [
+                "self"
+            ]
+        },
+        "relationships": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "events": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "data": {
+                            "type": [
+                                "array",
+                                "null"
+                            ],
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "event"
+                                        ]
+                                    },
+                                    "id": {
+                                        "type": "string",
+                                        "description": "Related Events"
+                                    }
+                                },
+                                "required": [
+                                    "type",
+                                    "id"
+                                ]
+                            }
+                        },
+                        "links": {
+                            "type": "object",
+                            "properties": {
+                                "self": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "description": "Self link"
+                                },
+                                "related": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "description": "Related link"
+                                }
+                            },
+                            "required": [
+                                "self",
+                                "related"
+                            ]
+                        }
+                    }
+                },
+                "item": {
+                    "type": "object",
+                    "properties": {
+                        "links": {
+                            "type": "object",
+                            "properties": {
+                                "self": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "description": "Self link"
+                                },
+                                "related": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "description": "Related link"
+                                }
+                            },
+                            "required": [
+                                "self",
+                                "related"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "type",
+        "id",
+        "attributes",
+        "links"
+    ]
+}
