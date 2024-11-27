@@ -20,6 +20,7 @@ ENDPOINTS = {
     'list_members': 'https://a.klaviyo.com/api/v2/group/{list_id}/members/all',
     'events': 'https://a.klaviyo.com/api/events/',
     'profiles': 'https://a.klaviyo.com/api/profiles/',
+    'reviews': 'https://a.klaviyo.com/api/reviews/',
 }
 
 # listing of incremental streams
@@ -35,7 +36,8 @@ EVENT_MAPPINGS = {
     "Updated Email Preferences": "update_email_preferences",
     "Dropped Email": "dropped_email",
     "Events": "events",
-    "Profiles":"profiles"
+    "Profiles":"profiles",
+    "Reviews":"reviews"
 }
 
 
@@ -94,7 +96,7 @@ PROFILES = Stream(
     'full'
 )
 
-FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS, LIST_MEMBERS, EVENTS,PROFILES]
+FULL_STREAMS = [GLOBAL_EXCLUSIONS, LISTS, LIST_MEMBERS, EVENTS, PROFILES]
 
 
 def get_abs_path(path):
